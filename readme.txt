@@ -44,7 +44,8 @@ Also you can sort photo streams by:
 
 == Screenshots ==
 
-1. 500px Widget
+1. Widget's Settings
+2. Widget's sample view at website
 
 == Changelog ==
 

@@ -3,7 +3,7 @@ Contributors: kutsy
 Tags: widget, 500px, photos, gallery, image, plugin
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 0.1
+Stable tag: 0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,10 @@ Also you can sort photo streams by:
 2. Widget's sample view at website
 
 == Changelog ==
+
+= 0.2 [2013-02-18] =
+* Widget ID changes, CSS class changes
+* Fix bug on add widget from Widgets Management
 
 = 0.1 [2013-02-18] =
 * Initialization commit

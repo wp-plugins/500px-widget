@@ -2,8 +2,8 @@
 /**
  * Plugin Name: 500px Widget
  * Plugin URI: http://romantelychko.com/downloads/wordpress/plugins/500px-widget.latest.zip
- * Description: Displays photos from 500px.com as widget with many options.
- * Version: 0.2
+ * Description: 500px Widget works only as a sidebar widget and will retrieve images (based on a criteria) hosted on the 500px.com service. No 500px API key is required to use this plugin.
+ * Version: 0.3
  * Author: Roman Telychko
  * Author URI: http://romantelychko.com
 */
@@ -25,10 +25,44 @@ class Widget_500px extends WP_Widget
         'feature'                   => 1,
         'feature_username'          => '',
         'feature_tag'               => '',
+        'category'                  => -1,
         'sort_by'                   => 1,
         'count'                     => 6,
         'thumb_size'                => 1,
         'cache_lifetime'            => 3600,
+        
+        'categories'                => 
+            array(
+                '-1'    => 'Any',
+                '0'     => 'Uncategorized',
+                '10'    => 'Abstract',
+                '11'    => 'Animals',
+                '5'     => 'Black and White',
+                '1'     => 'Celebrities',
+                '9'     => 'City and Architecture',
+                '15'    => 'Commercial',
+                '16'    => 'Concert',
+                '20'    => 'Family',
+                '14'    => 'Fashion',
+                '2'     => 'Film',
+                '24'    => 'Fine Art',
+                '23'    => 'Food',
+                '3'     => 'Journalism',
+                '8'     => 'Landscapes',
+                '12'    => 'Macro',
+                '18'    => 'Nature',
+                '4'     => 'Nude',
+                '7'     => 'People',
+                '19'    => 'Performing Arts',
+                '17'    => 'Sport',
+                '6'     => 'Still Life',
+                '21'    => 'Street',
+                '26'    => 'Transporation',
+                '13'    => 'Travel',
+                '22'    => 'Underwater',
+                '27'    => 'Urban Exploration',
+                '25'    => 'Wedding',
+            ),
         );
 
     ///////////////////////////////////////////////////////////////////////////
@@ -64,6 +98,8 @@ class Widget_500px extends WP_Widget
 	 */
 	public function widget( $args, $instance ) 
 	{
+	    ///////////////////////////////////////////////////////////////////////
+	
 	    // args
 	    $args = array_merge( $this->defaults, $args );
 		
@@ -81,14 +117,12 @@ class Widget_500px extends WP_Widget
 		    {
 		        return false;
 		    }
-		    
-		    $title = apply_filters( 'widget_title', $instance['title'] );
      
             $html = $args['before_widget'];
 
-		    if( !empty( $title ) )
+		    if( !empty( $instance['title'] ) )
 		    {
-			    $html .= $args['before_title'].$title.$args['after_title'];
+			    $html .= $args['before_title'].$instance['title'].$args['after_title'];
 		    }
 		
 		    $html .= $this->getHTML( $photos, $instance );
@@ -100,6 +134,8 @@ class Widget_500px extends WP_Widget
 		}
 
 		echo( $html );		
+		
+	    ///////////////////////////////////////////////////////////////////////
 	}
 	
     ///////////////////////////////////////////////////////////////////////////
@@ -112,7 +148,11 @@ class Widget_500px extends WP_Widget
 	 */
 	public function getPhotos( $args = array() )
 	{
+	    ///////////////////////////////////////////////////////////////////////
+	    
 	    $url = 'https://api.500px.com/v1/photos';
+
+	    ///////////////////////////////////////////////////////////////////////
 
 	    switch( $args['sort_by'] )
 	    {
@@ -147,8 +187,19 @@ class Widget_500px extends WP_Widget
                                         
 	    }
 	    
+	    ///////////////////////////////////////////////////////////////////////
+	    
 	    #$url_params .= '?consumer_key='.$args['consumer_key'].'&sort='.$url_sort.'&rpp='.$args['count'].'&image_size='.$args['thumb_size'];
 	    $url_params .= '?consumer_key='.$this->defaults['consumer_key'].'&sort='.$url_sort.'&rpp='.$args['count'].'&image_size='.$args['thumb_size'];	    
+	    
+	    ///////////////////////////////////////////////////////////////////////
+	    
+	    if( $args['feature']<10 && $args['category']>=0 && isset($this->defaults['categories'][$args['category']]) )
+	    {
+	        $url_params .= '&only='.urlencode( $this->defaults['categories'][$args['category']] );
+	    }
+	    
+	    ///////////////////////////////////////////////////////////////////////
 
 	    switch( $args['feature'] )
 	    {
@@ -190,12 +241,14 @@ class Widget_500px extends WP_Widget
 	            break;
 	            
 	        case 10:            // Tag Photos
-	            $url .= '/search'.$url_params.'&tag='.$args['feature_tag'];
+	            $url .= '/search'.$url_params.'&tag='.urlencode($args['feature_tag']);
 	            break;
 	    }
+	    
+	    ///////////////////////////////////////////////////////////////////////
 
     	$data = file_get_contents( $url );
-	
+    	
         if( !empty($data) )
         {	
 	        return json_decode( $data, true );
@@ -213,6 +266,8 @@ class Widget_500px extends WP_Widget
         */
 
 	    return array();
+	    
+	    ///////////////////////////////////////////////////////////////////////
 	}
 	
     ///////////////////////////////////////////////////////////////////////////
@@ -226,10 +281,14 @@ class Widget_500px extends WP_Widget
 	 */
 	public function getHTML( $photos = array(), $args = array() )
 	{	
+	    ///////////////////////////////////////////////////////////////////////
+	
 	    if( empty($photos) || !isset($photos['photos']) || empty($photos['photos']) )
 	    {
 	        return false;
 	    }
+	    
+	    ///////////////////////////////////////////////////////////////////////
 	    
 	    // args
 	    $args = array_merge( $this->defaults, $args );
@@ -254,18 +313,24 @@ class Widget_500px extends WP_Widget
 	            $height = '';
 	            break;
 	    }
+	    
+	    ///////////////////////////////////////////////////////////////////////
 
 	    $html = '';
 	    
 	    foreach( $photos['photos'] as $photo )
 	    {
 	        $html .= 
-	            '<a href="http://500px.com/photo/'.$photo['id'].'" target="_BLANK" rel="nofollow" title="'.$photo['name'].'">'.
-	                '<img src="'.$photo['image_url'].'"'.( $width ? ' width="'.$width.'"' : '' ).( $height ? ' height="'.$height.'"' : '' ).' alt="'.$photo['name'].'" />'.
-                '</a> ';
+	            '<span class="'.$this->defaults['widget_id'].'_item">'.
+	                '<a href="http://500px.com/photo/'.$photo['id'].'" target="_blank" rel="nofollow" title="'.esc_attr($photo['name']).'">'.
+	                    '<img src="'.$photo['image_url'].'"'.( $width ? ' width="'.$width.'"' : '' ).( $height ? ' height="'.$height.'"' : '' ).' alt="'.esc_attr($photo['name']).'" />'.
+                    '</a>'.
+                '</span> ';
 	    }
 	    
 	    return $html;	
+	    
+	    ///////////////////////////////////////////////////////////////////////
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -277,6 +342,8 @@ class Widget_500px extends WP_Widget
 	 */
 	public function clearCache()
 	{	
+	    ///////////////////////////////////////////////////////////////////////
+	
 	    global $wpdb;
 	
 	    $q = '
@@ -298,6 +365,8 @@ class Widget_500px extends WP_Widget
 	    }
 	    
 	    return true;
+	    
+	    ///////////////////////////////////////////////////////////////////////
 	}
 	
     ///////////////////////////////////////////////////////////////////////////
@@ -314,22 +383,29 @@ class Widget_500px extends WP_Widget
 	 */
 	public function update( $new_instance, $old_instance ) 
 	{
+	    ///////////////////////////////////////////////////////////////////////
+	
 	    // drop cache
 	    $this->clearCache();
+	    
+	    ///////////////////////////////////////////////////////////////////////
 	
 	    // return sanitized data
 		return 
 		    array(
-		        'title'                         => trim( strip_tags( $new_instance['title'] ) ),
+		        'title'                         => trim( strip_tags( $new_instance['title'], '<a><b><strong><i><em><span><div>' ) ),
 		        #'consumer_key'                  => trim( preg_replace( '#[^0-9A-Za-z]#', '', strip_tags( $new_instance['consumer_key'] ) ) ),
                 'feature'                       => intval( preg_replace( '#[^0-9]#', '', $new_instance['feature'] ) ),
                 'feature_username'              => trim( strip_tags( $new_instance['feature_username'] ) ),
                 'feature_tag'                   => trim( strip_tags( $new_instance['feature_tag'] ) ),
+                'category'                      => intval( preg_replace( '#[^0-9\-]#', '', $new_instance['category'] ) ),
                 'sort_by'                       => intval( preg_replace( '#[^0-9]#', '', $new_instance['sort_by'] ) ),
 		        'count'                         => intval( preg_replace( '#[^0-9]#', '', $new_instance['count'] ) ),
 		        'thumb_size'                    => intval( preg_replace( '#[^0-9]#', '', $new_instance['thumb_size'] ) ),
 		        'cache_lifetime'                => intval( preg_replace( '#[^0-9]#', '', $new_instance['cache_lifetime'] ) ),
 		    );
+		    
+	    ///////////////////////////////////////////////////////////////////////
 	}
 	
     ///////////////////////////////////////////////////////////////////////////
@@ -343,16 +419,21 @@ class Widget_500px extends WP_Widget
 	 */
 	public function form( $instance ) 
 	{   
+	    ///////////////////////////////////////////////////////////////////////
+	
 	    // defaults
 	    $title                      = $this->defaults['title'];
 	    #$consumer_key               = $this->defaults['consumer_key'];	    
 	    $feature                    = $this->defaults['feature'];
 	    $feature_username           = $this->defaults['feature_username'];
 	    $feature_tag                = $this->defaults['feature_tag'];
+	    $category                   = $this->defaults['category'];
 	    $sort_by                    = $this->defaults['sort_by'];
 	    $count                      = $this->defaults['count'];
 	    $thumb_size                 = $this->defaults['thumb_size'];
 	    $cache_lifetime             = $this->defaults['cache_lifetime'];
+	    
+	    ///////////////////////////////////////////////////////////////////////
 
         // set values
 		if( isset($instance['title']) && strlen($instance['title'])>1 ) 
@@ -380,6 +461,11 @@ class Widget_500px extends WP_Widget
 			$feature_tag = $instance['feature_tag'];
 		}
 		
+		if( isset($instance['category']) ) 
+		{
+			$category = intval($instance['category']);
+		}
+		
 		if( isset($instance['sort_by']) && intval($instance['sort_by'])>0 ) 
 		{
 			$sort_by = intval($instance['sort_by']);
@@ -400,6 +486,17 @@ class Widget_500px extends WP_Widget
 			$cache_lifetime = intval($instance['cache_lifetime']);
 		}
 	
+	    ///////////////////////////////////////////////////////////////////////
+	    
+	    $temp_select_categories = '';
+	    
+	    foreach( $this->defaults['categories'] as $category_id => $category_title )
+	    {
+	        $temp_select_categories .= '<option value="'.$category_id.'"'.( $category_id==$category ? ' selected="selected"' : '' ).'>'.$category_title.'</option>';
+	    }
+	    
+	    ///////////////////////////////////////////////////////////////////////
+	
 	    // html	
 		echo(
 		    '<script type="text/javascript">
@@ -414,16 +511,19 @@ class Widget_500px extends WP_Widget
                                 {
                                     jQuery(this).closest(\'div.'.$this->defaults['widget_id'].'_div\').find(\'p.'.$this->defaults['widget_id'].'_feature_username_p\').hide();
                                     jQuery(this).closest(\'div.'.$this->defaults['widget_id'].'_div\').find(\'p.'.$this->defaults['widget_id'].'_feature_tag_p\').hide();
+                                    jQuery(this).closest(\'div.'.$this->defaults['widget_id'].'_div\').find(\'p.'.$this->defaults['widget_id'].'_category_p\').show();
                                 }
                                 else if( jQuery(this).val()==10 )
                                 {
                                     jQuery(this).closest(\'div.'.$this->defaults['widget_id'].'_div\').find(\'p.'.$this->defaults['widget_id'].'_feature_username_p\').hide();
                                     jQuery(this).closest(\'div.'.$this->defaults['widget_id'].'_div\').find(\'p.'.$this->defaults['widget_id'].'_feature_tag_p\').show();
+                                    jQuery(this).closest(\'div.'.$this->defaults['widget_id'].'_div\').find(\'p.'.$this->defaults['widget_id'].'_category_p\').hide();
                                 }
                                 else
                                 {
                                     jQuery(this).closest(\'div.'.$this->defaults['widget_id'].'_div\').find(\'p.'.$this->defaults['widget_id'].'_feature_username_p\').show();
                                     jQuery(this).closest(\'div.'.$this->defaults['widget_id'].'_div\').find(\'p.'.$this->defaults['widget_id'].'_feature_tag_p\').hide();
+                                    jQuery(this).closest(\'div.'.$this->defaults['widget_id'].'_div\').find(\'p.'.$this->defaults['widget_id'].'_category_p\').show();
                                 }                                       		        
                                 
                                 return true;
@@ -465,6 +565,12 @@ class Widget_500px extends WP_Widget
 		            '<label for="'.$this->get_field_id('feature_tag').'">Tag:</label>'.
 		            '<input class="widefat" id="'.$this->get_field_id('feature_tag').'" name="'.$this->get_field_name('feature_tag').'" type="text" value="'.esc_attr($feature_tag).'" />'.
 		        '</p>'.
+		        '<p class="'.$this->defaults['widget_id'].'_category_p"'.( $feature<10 ? ' style="display:block;"' : ' style="display:none;"' ).'>'.
+		            '<label for="'.$this->get_field_id('category').'">Category:</label>'.
+		            '<select class="widefat" id="'.$this->get_field_id('category').'" name="'.$this->get_field_name('category').'">'.		            		        
+		                $temp_select_categories.
+		            '</select>'.
+		        '</p>'.			        
 		        '<p>'.
 		            '<label for="'.$this->get_field_id('sort_by').'">Sort by:</label>'.
 		            '<select class="widefat" id="'.$this->get_field_id('sort_by').'" name="'.$this->get_field_name('sort_by').'">'.		            
@@ -499,6 +605,8 @@ class Widget_500px extends WP_Widget
 		        '</p>'.
 	        '</div>'
 		    );
+		    
+	    ///////////////////////////////////////////////////////////////////////
 	}
 
     ///////////////////////////////////////////////////////////////////////////
@@ -506,7 +614,7 @@ class Widget_500px extends WP_Widget
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// register AJAX Hits Counter: Popular Posts Widget
+// register 500px Widget
 add_action( 'widgets_init', create_function( '', 'register_widget( "Widget_500px" );' ) );
 
 ///////////////////////////////////////////////////////////////////////////////

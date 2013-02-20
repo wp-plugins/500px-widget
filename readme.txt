@@ -3,15 +3,17 @@ Contributors: kutsy
 Tags: widget, 500px, photos, gallery, image, plugin
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 0.2
+Stable tag: 0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Displays photos from 500px.com as widget with many options.
+500px Widget works only as a sidebar widget and will retrieve images (based on a criteria) hosted on the 500px.com service.
 
 == Description ==
 
-Displays photos from 500px.com as widget with many options.
+500px Widget works only as a sidebar widget and will retrieve images (based on a criteria) hosted on the 500px.com service.
+
+No 500px API key is required to use this plugin.
 
 You can choose photo streams: 
 
@@ -36,10 +38,12 @@ Also you can sort photo streams by:
 * Comments count (Most commented first)
 * Original date (Most recent first)
 
+And you can filter results by one of 28 categories: Abstract, Animals, Black and White, Celebrities, City and Architecture, Commercial, Concert, Family, Fashion, Film, Fine Art, Food, Journalism, Landscapes, Macro, Nature, Nude, People, Performing Arts, Sport, Still Life, Street, Transporation, Travel, Underwater, Urban Exploration, Wedding and Uncategorized.
+
 == Installation ==
 
 1. Upload `500px-widget` directory to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
+1. Activate the plugin through the "Plugins" menu in WordPress
 1. Use "500px Widget" from Widgets Management
 
 == Screenshots ==
@@ -49,8 +53,16 @@ Also you can sort photo streams by:
 
 == Changelog ==
 
-= 0.2 [2013-02-18] =
-* Widget ID changes, CSS class changes
+= 0.3 [2013-02-20] =
+* Every item is wrapped into `<span class="widget_500px_item">...</span>`
+* Now you can wrap `title` into tags: `<a>`, `<b>`, `<strong>`, `<i>`, `<em>`, `<span>` and `<div>`
+* Added categories in widget's filter
+* Updated screenshots
+* Fix some bugs
+
+= 0.2 [2013-02-19] =
+* Widget ID changes
+* CSS class changes
 * Fix bug on add widget from Widgets Management
 
 = 0.1 [2013-02-18] =

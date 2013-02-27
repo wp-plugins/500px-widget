@@ -3,7 +3,7 @@
  * Plugin Name: 500px Widget
  * Plugin URI: http://romantelychko.com/downloads/wordpress/plugins/500px-widget.latest.zip
  * Description: 500px Widget works only as a sidebar widget and will retrieve images (based on a criteria) hosted on the 500px.com service. No 500px API key is required to use this plugin.
- * Version: 0.3
+ * Version: 0.4
  * Author: Roman Telychko
  * Author URI: http://romantelychko.com
 */
@@ -130,7 +130,7 @@ class Widget_500px extends WP_Widget
 		    $html .= $args['after_widget'];
 	
             // store result to cache
-            set_transient( $cache_key, $html, $args['cache_lifetime'] );	            
+            set_transient( $cache_key, $html, $instance['cache_lifetime'] );	            
 		}
 
 		echo( $html );		

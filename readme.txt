@@ -3,7 +3,7 @@ Contributors: kutsy
 Tags: widget, 500px, photos, gallery, image, plugin
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 0.3
+Stable tag: 0.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,6 +52,12 @@ And you can filter results by one of 28 categories: Abstract, Animals, Black and
 2. Widget's sample view at website
 
 == Changelog ==
+
+= 0.5 [2013-02-27] =
+* Replaced `file_get_contents()` to `wp_remote_get()` for more flexibility.  
+
+= 0.4 [2013-02-27] =
+* Cache lifetime bug fix
 
 = 0.3 [2013-02-20] =
 * Every item is wrapped into `<span class="widget_500px_item">...</span>`

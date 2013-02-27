@@ -3,7 +3,7 @@
  * Plugin Name: 500px Widget
  * Plugin URI: http://romantelychko.com/downloads/wordpress/plugins/500px-widget.latest.zip
  * Description: 500px Widget works only as a sidebar widget and will retrieve images (based on a criteria) hosted on the 500px.com service. No 500px API key is required to use this plugin.
- * Version: 0.3
+ * Version: 0.5
  * Author: Roman Telychko
  * Author URI: http://romantelychko.com
 */
@@ -130,7 +130,7 @@ class Widget_500px extends WP_Widget
 		    $html .= $args['after_widget'];
 	
             // store result to cache
-            set_transient( $cache_key, $html, $args['cache_lifetime'] );	            
+            set_transient( $cache_key, $html, $instance['cache_lifetime'] );	            
 		}
 
 		echo( $html );		
@@ -247,23 +247,12 @@ class Widget_500px extends WP_Widget
 	    
 	    ///////////////////////////////////////////////////////////////////////
 
-    	$data = file_get_contents( $url );
-    	
-        if( !empty($data) )
+        $data = wp_remote_get( $url, array( 'timeout' => 2 ) );
+
+        if( !empty($data) && isset($data['body']) && !empty($data['body']) )
         {	
-	        return json_decode( $data, true );
+            return json_decode( $data['body'], true );
         }
-        
-        /*
-            TODO: add CURL support if allow_url_fopen==off
-            
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $this->page);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $data = curl_exec($ch);
-            curl_close($ch);
-            
-        */
 
 	    return array();
 	    

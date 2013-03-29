@@ -3,7 +3,7 @@
  * Plugin Name: 500px Widget
  * Plugin URI: http://romantelychko.com/downloads/wordpress/plugins/500px-widget.latest.zip
  * Description: 500px Widget works only as a sidebar widget and will retrieve images (based on a criteria) hosted on the 500px.com service. No 500px API key is required to use this plugin.
- * Version: 0.5
+ * Version: 0.6
  * Author: Roman Telychko
  * Author URI: http://romantelychko.com
 */
@@ -30,7 +30,7 @@ class Widget_500px extends WP_Widget
         'count'                     => 6,
         'thumb_size'                => 1,
         'cache_lifetime'            => 3600,
-        
+        'one_element_html'          => "<span class=\"widget_500px_item entry-content\">\n<a href=\"{photo_url}\" target=\"_blank\" rel=\"nofollow\" title=\"{photo_title}\"><img src=\"{photo_image_url}\" width=\"{photo_width}\" height=\"{photo_height}\" alt=\"{photo_title}\" /></a>\n</span>",
         'categories'                => 
             array(
                 '-1'    => 'Any',
@@ -80,8 +80,8 @@ class Widget_500px extends WP_Widget
 			    'classname'     => $this->defaults['widget_id'],
 			    ),
 		    array(
-			    'width'     => 250,
-			    'height'    => 350,
+			    'width'     => 400,
+			    'height'    => 700,
 		    )
 		);
 	}
@@ -310,11 +310,32 @@ class Widget_500px extends WP_Widget
 	    foreach( $photos['photos'] as $photo )
 	    {
 	        $html .= 
+	            str_ireplace(
+	                array(
+	                    '{photo_title}',
+	                    '{photo_url}',
+	                    '{photo_image_url}',
+	                    '{photo_width}',
+	                    '{photo_height}',
+	                    ),
+	                array(
+	                    $photo['name'],
+	                    'http://500px.com/photo/'.$photo['id'],
+	                    $photo['image_url'],
+	                    $width,
+	                    $height,
+	                    ),
+	                $args['one_element_html']
+	                );
+	        
+	        /*
+	        $html .= 
 	            '<span class="'.$this->defaults['widget_id'].'_item">'.
 	                '<a href="http://500px.com/photo/'.$photo['id'].'" target="_blank" rel="nofollow" title="'.esc_attr($photo['name']).'">'.
 	                    '<img src="'.$photo['image_url'].'"'.( $width ? ' width="'.$width.'"' : '' ).( $height ? ' height="'.$height.'"' : '' ).' alt="'.esc_attr($photo['name']).'" />'.
                     '</a>'.
                 '</span> ';
+            */
 	    }
 	    
 	    return $html;	
@@ -392,6 +413,7 @@ class Widget_500px extends WP_Widget
 		        'count'                         => intval( preg_replace( '#[^0-9]#', '', $new_instance['count'] ) ),
 		        'thumb_size'                    => intval( preg_replace( '#[^0-9]#', '', $new_instance['thumb_size'] ) ),
 		        'cache_lifetime'                => intval( preg_replace( '#[^0-9]#', '', $new_instance['cache_lifetime'] ) ),
+		        'one_element_html'              => trim( $new_instance['one_element_html'] ),
 		    );
 		    
 	    ///////////////////////////////////////////////////////////////////////
@@ -421,6 +443,7 @@ class Widget_500px extends WP_Widget
 	    $count                      = $this->defaults['count'];
 	    $thumb_size                 = $this->defaults['thumb_size'];
 	    $cache_lifetime             = $this->defaults['cache_lifetime'];
+	    $one_element_html           = $this->defaults['one_element_html'];
 	    
 	    ///////////////////////////////////////////////////////////////////////
 
@@ -473,6 +496,11 @@ class Widget_500px extends WP_Widget
 		if( isset($instance['cache_lifetime']) && intval($instance['cache_lifetime'])>0 ) 
 		{
 			$cache_lifetime = intval($instance['cache_lifetime']);
+		}
+		
+		if( isset($instance['one_element_html']) && strlen($instance['one_element_html'])>1 ) 
+		{
+			$one_element_html = $instance['one_element_html'];
 		}
 	
 	    ///////////////////////////////////////////////////////////////////////
@@ -588,6 +616,18 @@ class Widget_500px extends WP_Widget
 		        '<p>'.
 		            '<label for="'.$this->get_field_id('cache_lifetime').'">Cache lifetime (sec):</label>'.
 		            '<input class="widefat" id="'.$this->get_field_id('cache_lifetime').'" name="'.$this->get_field_name('cache_lifetime').'" type="text" value="'.esc_attr($cache_lifetime).'" />'.
+		        '</p>'.
+		        '<p>'.
+		            '<label for="'.$this->get_field_id('one_element_html').'">One element HTML (inside &lt;LI&gt;):</label>'.
+		            '<textarea class="widefat" cols="20" rows="6" id="'.$this->get_field_id('one_element_html').'" name="'.$this->get_field_name('one_element_html').'">'.$one_element_html.'</textarea>'.
+                    'You can use this placeholders:'.
+                    '<ul>'.
+		                '<li><code>{photo_title}</code> - Photo title on <a href="http://500px.com">500px.com</a></li>'.
+		                '<li><code>{photo_url}</code> - URL to photo on <a href="http://500px.com">500px.com</a></li>'.
+		                '<li><code>{photo_image_url}</code> - URL to photo image on <a href="http://500px.com">500px.com</a></li>'.
+		                '<li><code>{photo_width}</code> - Thumbnail width (in px).<br />&nbsp;&nbsp;Recommended to remove attribute for Thumb Size: <code>900x/x900</code></li>'.
+		                '<li><code>{photo_height}</code> - Thumbnail height (in px).<br />&nbsp;&nbsp;Recommended to remove attribute for Thumb Size: <code>900x/x900</code></li>'.
+	                '</ul>'.
 		        '</p>'.
 		        '<p>'.
 		            'I forgot something? <a href="http://wordpress.org/support/plugin/500px-widget" target="_BLANK">You can write to me!</a>'.

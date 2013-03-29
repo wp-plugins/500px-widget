@@ -3,7 +3,7 @@ Contributors: kutsy
 Tags: widget, 500px, photos, gallery, image, plugin
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 0.5
+Stable tag: 0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,8 @@ Also you can sort photo streams by:
 
 And you can filter results by one of 28 categories: Abstract, Animals, Black and White, Celebrities, City and Architecture, Commercial, Concert, Family, Fashion, Film, Fine Art, Food, Journalism, Landscapes, Macro, Nature, Nude, People, Performing Arts, Sport, Still Life, Street, Transporation, Travel, Underwater, Urban Exploration, Wedding and Uncategorized.
 
+Also you can customize displaying elements by using predefined placeholders, such as `{photo_title}`, `{photo_url}`, `{photo_image_url}`, `{photo_width}` and `{photo_height}`.
+
 == Installation ==
 
 1. Upload `500px-widget` directory to the `/wp-content/plugins/` directory
@@ -52,6 +54,9 @@ And you can filter results by one of 28 categories: Abstract, Animals, Black and
 2. Widget's sample view at website
 
 == Changelog ==
+
+= 0.6 [2013-03-29] =
+* Added customization of displaying elements by using predefined placeholders, such as `{photo_title}`, `{photo_url}`, `{photo_image_url}`, `{photo_width}` and `{photo_height}`. 
 
 = 0.5 [2013-02-27] =
 * Replaced `file_get_contents()` to `wp_remote_get()` for more flexibility.  

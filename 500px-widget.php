@@ -3,7 +3,7 @@
  * Plugin Name: 500px Widget
  * Plugin URI: http://romantelychko.com/downloads/wordpress/plugins/500px-widget.latest.zip
  * Description: 500px Widget works only as a sidebar widget and will retrieve images (based on a criteria) hosted on the 500px.com service. No 500px API key is required to use this plugin.
- * Version: 0.6
+ * Version: 0.7
  * Author: Roman Telychko
  * Author URI: http://romantelychko.com
 */
@@ -111,13 +111,6 @@ class Widget_500px extends WP_Widget
 
         if( empty($html) )
         {   
-            $photos = $this->getPhotos( $instance );
-            
-		    if( empty($photos) )
-		    {
-		        return false;
-		    }
-     
             $html = $args['before_widget'];
 
 		    if( !empty( $instance['title'] ) )
@@ -125,12 +118,29 @@ class Widget_500px extends WP_Widget
 			    $html .= $args['before_title'].$instance['title'].$args['after_title'];
 		    }
 		
-		    $html .= $this->getHTML( $photos, $instance );
+		    $photos = $this->getPhotos( $instance );
+
+		    if( empty($photos) )
+		    {
+		        return false;
+		    }
+		    
+		    if( is_array($photos) )
+		    {
+		        $html .= $this->getHTML( $photos, $instance );
+		    }
+		    else
+		    {
+		        $html .= '<span class="error">'.$photos.'</span>';        // its error
+		    }
 
 		    $html .= $args['after_widget'];
 	
-            // store result to cache
-            set_transient( $cache_key, $html, $instance['cache_lifetime'] );	            
+		    if( is_array($photos) )     // if not error
+		    {
+                // store result to cache
+                set_transient( $cache_key, $html, $instance['cache_lifetime'] );
+            }
 		}
 
 		echo( $html );		
@@ -190,7 +200,7 @@ class Widget_500px extends WP_Widget
 	    ///////////////////////////////////////////////////////////////////////
 	    
 	    #$url_params .= '?consumer_key='.$args['consumer_key'].'&sort='.$url_sort.'&rpp='.$args['count'].'&image_size='.$args['thumb_size'];
-	    $url_params .= '?consumer_key='.$this->defaults['consumer_key'].'&sort='.$url_sort.'&rpp='.$args['count'].'&image_size='.$args['thumb_size'];	    
+	    $url_params = '?consumer_key='.$this->defaults['consumer_key'].'&sort='.$url_sort.'&rpp='.$args['count'].'&image_size='.$args['thumb_size'];	    
 	    
 	    ///////////////////////////////////////////////////////////////////////
 	    
@@ -249,12 +259,19 @@ class Widget_500px extends WP_Widget
 
         $data = wp_remote_get( $url, array( 'timeout' => 2 ) );
 
-        if( !empty($data) && isset($data['body']) && !empty($data['body']) )
+        if( !empty($data) )
         {	
-            return json_decode( $data['body'], true );
-        }
-
-	    return array();
+            if( is_object($data) )
+            {
+                return $data->get_error_message();
+            }
+            else if( isset($data['body']) && !empty($data['body']) )
+            {
+                return json_decode( $data['body'], true );
+            }            
+        }    
+	    
+	    return false;
 	    
 	    ///////////////////////////////////////////////////////////////////////
 	}

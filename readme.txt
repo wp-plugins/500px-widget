@@ -2,8 +2,8 @@
 Contributors: kutsy
 Tags: widget, 500px, photos, gallery, image, plugin
 Requires at least: 3.0
-Tested up to: 3.5
-Stable tag: 0.6
+Tested up to: 3.5.1
+Stable tag: 0.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -54,6 +54,10 @@ Also you can customize displaying elements by using predefined placeholders, suc
 2. Widget's sample view at website
 
 == Changelog ==
+
+= 0.7 [2013-05-14] =
+* Display connection errors
+* Fix some bugs
 
 = 0.6 [2013-03-29] =
 * Added customization of displaying elements by using predefined placeholders, such as `{photo_title}`, `{photo_url}`, `{photo_image_url}`, `{photo_width}` and `{photo_height}`. 

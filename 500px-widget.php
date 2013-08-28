@@ -3,7 +3,7 @@
  * Plugin Name: 500px Widget
  * Plugin URI: http://romantelychko.com/downloads/wordpress/plugins/500px-widget.latest.zip
  * Description: 500px Widget works only as a sidebar widget and will retrieve images (based on a criteria) hosted on the 500px.com service. No 500px API key is required to use this plugin.
- * Version: 0.7
+ * Version: 0.8.1
  * Author: Roman Telychko
  * Author URI: http://romantelychko.com
 */
@@ -95,11 +95,12 @@ class Widget_500px extends WP_Widget
 	 *
 	 * @param       array       $args               Widget arguments.
 	 * @param       array       $instance           Saved values from database.
+     * @return      html
 	 */
 	public function widget( $args, $instance ) 
 	{
 	    ///////////////////////////////////////////////////////////////////////
-	
+
 	    // args
 	    $args = array_merge( $this->defaults, $args );
 		
@@ -111,7 +112,9 @@ class Widget_500px extends WP_Widget
 
         if( empty($html) )
         {   
-            $html = $args['before_widget'];
+            $html =
+                ( isset($instance['custom_css']) && strlen($instance['custom_css'])>5 ? '<style type="text/css">'.$instance['custom_css'].'</style>' : '' ).
+                $args['before_widget'];
 
 		    if( !empty( $instance['title'] ) )
 		    {
@@ -414,7 +417,7 @@ class Widget_500px extends WP_Widget
 	
 	    // drop cache
 	    $this->clearCache();
-	    
+
 	    ///////////////////////////////////////////////////////////////////////
 	
 	    // return sanitized data
@@ -431,6 +434,15 @@ class Widget_500px extends WP_Widget
 		        'thumb_size'                    => intval( preg_replace( '#[^0-9]#', '', $new_instance['thumb_size'] ) ),
 		        'cache_lifetime'                => intval( preg_replace( '#[^0-9]#', '', $new_instance['cache_lifetime'] ) ),
 		        'one_element_html'              => trim( $new_instance['one_element_html'] ),
+                'custom_css'                    => trim(
+                                                       strip_tags(
+                                                           str_ireplace(
+                                                               '#'.$this->id_base.'-__i__',
+                                                               '#'.$this->id_base.'-'.$this->number,
+                                                               $new_instance['custom_css']
+                                                           )
+                                                       )
+                                                   ),
 		    );
 		    
 	    ///////////////////////////////////////////////////////////////////////
@@ -444,9 +456,10 @@ class Widget_500px extends WP_Widget
 	 * @see WP_Widget::form()
 	 *
 	 * @param       array       $instance           Previously saved values from database.
+     * @return      html
 	 */
 	public function form( $instance ) 
-	{   
+	{
 	    ///////////////////////////////////////////////////////////////////////
 	
 	    // defaults
@@ -461,6 +474,7 @@ class Widget_500px extends WP_Widget
 	    $thumb_size                 = $this->defaults['thumb_size'];
 	    $cache_lifetime             = $this->defaults['cache_lifetime'];
 	    $one_element_html           = $this->defaults['one_element_html'];
+        $custom_css                 = '';
 	    
 	    ///////////////////////////////////////////////////////////////////////
 
@@ -519,7 +533,21 @@ class Widget_500px extends WP_Widget
 		{
 			$one_element_html = $instance['one_element_html'];
 		}
-	
+
+        if( isset($instance['custom_css']) )
+        {
+            $custom_css = $instance['custom_css'];
+        }
+        else
+        {
+            $temp_widget_id = $this->id_base.'-'.$this->number;
+
+            $custom_css =
+                '#'.$temp_widget_id.' { /* block style */ }'."\n".
+                '#'.$temp_widget_id.' .widget-title { /* widget title style */ }'."\n".
+                '#'.$temp_widget_id.' .widget_500px_item { /* one item style */ }';
+        }
+
 	    ///////////////////////////////////////////////////////////////////////
 	    
 	    $temp_select_categories = '';
@@ -646,6 +674,10 @@ class Widget_500px extends WP_Widget
 		                '<li><code>{photo_height}</code> - Thumbnail height (in px).<br />&nbsp;&nbsp;Recommended to remove attribute for Thumb Size: <code>900x/x900</code></li>'.
 	                '</ul>'.
 		        '</p>'.
+                '<p>'.
+                    '<label for="'.$this->get_field_id('custom_css').'">Custom CSS (remove if unneeded):</label>'.
+                    '<textarea class="widefat" cols="20" rows="6" id="'.$this->get_field_id('custom_css').'" name="'.$this->get_field_name('custom_css').'">'.$custom_css.'</textarea>'.
+                '</p>'.
 		        '<p>'.
 		            'I forgot something? <a href="http://wordpress.org/support/plugin/500px-widget" target="_BLANK">You can write to me!</a>'.
 		        '</p>'.
@@ -664,4 +696,3 @@ class Widget_500px extends WP_Widget
 add_action( 'widgets_init', create_function( '', 'register_widget( "Widget_500px" );' ) );
 
 ///////////////////////////////////////////////////////////////////////////////
-

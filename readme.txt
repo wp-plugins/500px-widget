@@ -2,8 +2,8 @@
 Contributors: kutsy
 Tags: widget, 500px, photos, gallery, image, plugin
 Requires at least: 3.0
-Tested up to: 3.5.1
-Stable tag: 0.7
+Tested up to: 3.6
+Stable tag: 0.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,9 @@ Also you can customize displaying elements by using predefined placeholders, suc
 
 == Changelog ==
 
+= 0.8 [2013-08-28] =
+* Added Custom CSS box. Now you can add your styles from Widget Management
+
 = 0.7 [2013-05-14] =
 * Display connection errors
 * Fix some bugs
@@ -82,3 +85,4 @@ Also you can customize displaying elements by using predefined placeholders, suc
 
 = 0.1 [2013-02-18] =
 * Initialization commit
+
